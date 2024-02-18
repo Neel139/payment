@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 CORS_ORIGIN_WHITELIST = [
-    '',
+    "http://localhost:3000"
 ]
 # Application definition
 
@@ -89,7 +89,7 @@ DATABASES = {
 		'ENGINE': 'django.db.backends.mysql',
 		'NAME': 'razorpay',
 		'USER': 'root',
-		'PASSWORD': '',
+		'PASSWORD': 'root',
 		'HOST':'localhost',
 		'PORT':'3306',
 	}
