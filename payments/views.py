@@ -1,21 +1,22 @@
 import json
-
+import os
 import environ
 import razorpay
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from dotenv import load_dotenv
+# from os.envi import PUBLIC_KEY, SECRETKEY
 # from api.settings import PUBLIC_KEY, SECRETKEY
-
 from .models import Order
 from .serializers import OrderSerializer
 from django.conf import settings 
 env = environ.Env()
+load_dotenv()
 
 # you have to create .env file in same folder where you are using environ.Env()
 # reading .env file which located in api folder
 environ.Env.read_env()
-
+print(os.environ.get("PUBLIC_KEY"), os.environ.get("SECRET_KEY"))
 
 @api_view(['POST'])
 def start_payment(request):
@@ -24,8 +25,8 @@ def start_payment(request):
     name = request.data['name']
     
     # setup razorpay client
-    # client = razorpay.Client(auth=(PUBLIC_KEY,SECRETKEY))
-    client = razorpay.Client(auth=(env("PUBLIC_KEY"), env("SECRET_KEY")))
+    # client = razorpay.Client(auth=(PUBLIC_KEY,SECRET_KEY))
+    client = razorpay.Client(auth=(os.environ.get("PUBLIC_KEY"), os.environ.get("SECRET_KEY")))
 
     # create razorpay order
     payment = client.order.create({"amount": int(amount) * 100, 
@@ -90,9 +91,9 @@ def handle_payment_success(request):
         'razorpay_signature': raz_signature
     }
 
-    # client = razorpay.Client(auth=(PUBLIC_KEY,SECRETKEY))
-    client = razorpay.Client(auth=(env('PUBLIC_KEY'), env('SECRET_KEY')))
-
+    # client = razorpay.Client(auth=(PUBLIC_KEY,SECRET_KEY))
+    client = razorpay.Client(auth=(os.environ.get('PUBLIC_KEY'), os.environ.get('SECRET_KEY')))
+    
     # checking if the transaction is valid or not if it is "valid" then check will return None
     check = client.utility.verify_payment_signature(data)
 
