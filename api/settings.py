@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -25,7 +24,10 @@ SECRET_KEY = 'django-insecure-qgb)vjdf%0##n0-5c-a=0az)95m^ev(=fk8$hw*sigp36r$%9y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CORS_ORIGINS_ALLOW_ALL= True
+
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000"
@@ -89,7 +91,7 @@ DATABASES = {
 		'ENGINE': 'django.db.backends.mysql',
 		'NAME': 'razorpay',
 		'USER': 'root',
-		'PASSWORD': 'root',
+		'PASSWORD': '',
 		'HOST':'localhost',
 		'PORT':'3306',
 	}

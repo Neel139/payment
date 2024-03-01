@@ -5,9 +5,11 @@ import razorpay
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+# from api.settings import PUBLIC_KEY, SECRETKEY
+
 from .models import Order
 from .serializers import OrderSerializer
-
+from django.conf import settings 
 env = environ.Env()
 
 # you have to create .env file in same folder where you are using environ.Env()
@@ -20,9 +22,10 @@ def start_payment(request):
     # request.data is coming from frontend
     amount = request.data['amount']
     name = request.data['name']
-
+    
     # setup razorpay client
-    client = razorpay.Client(auth=(env('PUBLIC_KEY'), env('SECRET_KEY')))
+    # client = razorpay.Client(auth=(PUBLIC_KEY,SECRETKEY))
+    client = razorpay.Client(auth=(env("PUBLIC_KEY"), env("SECRET_KEY")))
 
     # create razorpay order
     payment = client.order.create({"amount": int(amount) * 100, 
@@ -49,6 +52,9 @@ def start_payment(request):
         "order": serializer.data
     }
     return Response(data)
+
+def new_func():
+    print('PUBLIC_KEY')
 
 
 @api_view(['POST'])
@@ -84,6 +90,7 @@ def handle_payment_success(request):
         'razorpay_signature': raz_signature
     }
 
+    # client = razorpay.Client(auth=(PUBLIC_KEY,SECRETKEY))
     client = razorpay.Client(auth=(env('PUBLIC_KEY'), env('SECRET_KEY')))
 
     # checking if the transaction is valid or not if it is "valid" then check will return None
