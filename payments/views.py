@@ -2,9 +2,12 @@ import json
 import os
 import environ
 import razorpay
+import datetime
+import pytz
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from dotenv import load_dotenv
+# from zoneinfo import ZoneInfo
 # from os.envi import PUBLIC_KEY, SECRETKEY
 # from api.settings import PUBLIC_KEY, SECRETKEY
 from .models import Order
@@ -23,23 +26,26 @@ def start_payment(request):
     # request.data is coming from frontend
     amount = request.data['amount']
     name = request.data['name']
-    
+    amount1 = float(amount) * 100
+    print(amount1)
     # setup razorpay client
     # client = razorpay.Client(auth=(PUBLIC_KEY,SECRET_KEY))
     client = razorpay.Client(auth=(os.environ.get("PUBLIC_KEY"), os.environ.get("SECRET_KEY")))
 
     # create razorpay order
-    payment = client.order.create({"amount": int(amount) * 100, 
+    payment = client.order.create({"amount": amount1, 
                                    "currency": "INR", 
-                                   "payment_capture": "1"})
-
+                                   "payment_capture": 1})
+   
     # we are saving an order with isPaid=False
     order = Order.objects.create(order_product=name, 
                                  order_amount=amount, 
-                                 order_payment_id=payment['id'])
+                                 order_payment_id=payment['id'],
+                                #  order_date = datetime.datetime.now(pytz.timezone("Asia/Kolkata")),
+                                )
 
     serializer = OrderSerializer(order)
-
+    print(amount,name)
     """order response will be 
     {'id': 17, 
     'order_date': '23 January 2021 03:28 PM', 
@@ -62,7 +68,7 @@ def new_func():
 def handle_payment_success(request):
     # request.data is coming from frontend
     res = json.loads(request.data["response"])
-
+    print(res)
     """res will be:
     {'razorpay_payment_id': 'pay_G3NivgSZLx7I9e', 
     'razorpay_order_id': 'order_G3NhfSWWh5UfjQ', 
@@ -72,7 +78,7 @@ def handle_payment_success(request):
     ord_id = ""
     raz_pay_id = ""
     raz_signature = ""
-
+    
     # res.keys() will give us list of keys in res
     for key in res.keys():
         if key == 'razorpay_order_id':
@@ -91,6 +97,12 @@ def handle_payment_success(request):
         'razorpay_signature': raz_signature
     }
 
+    try:
+        order = Order.objects.get(order_payment_id=ord_id)
+    except Order.DoesNotExist:
+        print("Order not found with ID", ord_id)
+        return Response({'error': 'Order not found'}, status=404)
+    
     # client = razorpay.Client(auth=(PUBLIC_KEY,SECRET_KEY))
     client = razorpay.Client(auth=(os.environ.get('PUBLIC_KEY'), os.environ.get('SECRET_KEY')))
     
@@ -104,7 +116,7 @@ def handle_payment_success(request):
     # if payment is successful that means check is None then we will turn isPaid=True
     order.isPaid = True
     order.save()
-
+    print(raz_pay_id)
     res_data = {
         'message': 'payment successfully received!'
     }
